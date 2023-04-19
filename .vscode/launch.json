@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Debug Run",
+            "program": "${workspaceFolder:debug-2227}/.build/debug/Run",
+            "args": [],
+            "cwd": "${workspaceFolder:debug-2227}",
+            "preLaunchTask": "swift: Build Debug Run"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Release Run",
+            "program": "${workspaceFolder:debug-2227}/.build/release/Run",
+            "args": [],
+            "cwd": "${workspaceFolder:debug-2227}",
+            "preLaunchTask": "swift: Build Release Run"
+        }
+    ]
+}
