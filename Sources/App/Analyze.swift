@@ -10,6 +10,9 @@ enum Analyze {
         struct Signature: CommandSignature {
             @Option(name: "limit", short: "l")
             var limit: Int?
+
+            @Flag(name: "use-transaction", short: "t")
+            var useTransaction: Bool
         }
 
         var help: String { "Run package analysis (fetching git repository and inspecting content)" }
@@ -21,9 +24,11 @@ enum Analyze {
             let db = context.application.db
             let logger = Logger(label: "analyze")
 
+            logger.info("using transaction: \(signature.useTransaction)")
 
             do {
-                try await analyze(client: client, database: db, logger: logger, limit: limit)
+                try await analyze(client: client, database: db, logger: logger, limit: limit,
+                                  useTransaction: signature.useTransaction)
             } catch {
                 logger.error("\(error.localizedDescription)")
             }
@@ -37,16 +42,19 @@ enum Analyze {
 
 extension Analyze {
 
-    static func analyze(client: Client, database: Database, logger: Logger, limit: Int) async throws {
+    static func analyze(client: Client, database: Database, logger: Logger, limit: Int, useTransaction: Bool) async throws {
         try await withThrowingTaskGroup(of: Int.self) { group in
             for n in (0..<limit) {
                 group.addTask {
-                    _ = try await client.get(URI(stringLiteral: "https://httpbin.org/delay/1"))
-                    let todo = try await createTodo(database, n)
-                    _ = try await client.get(URI(stringLiteral: "https://httpbin.org/delay/1"))
-                    try await updateTodo(database, todo)
-                    _ = try await client.get(URI(stringLiteral: "https://httpbin.org/delay/1"))
-                    try await updateTodo(database, todo)
+                    if useTransaction {
+                        try await database.transaction { tx in
+                            print("sleeping")
+                            sleep(11)
+                        }
+                    } else {
+                        print("sleeping")
+                        sleep(11)
+                    }
                     return n
                 }
             }
@@ -55,17 +63,6 @@ extension Analyze {
                 logger.info("Task \(res) done")
             }
         }
-    }
-
-    static func createTodo(_ database: Database, _ n: Int) async throws -> Todo {
-        let todo = Todo(title: "Todo \(n)")
-        try await todo.save(on: database)
-        return todo
-    }
-
-    static func updateTodo(_ database: Database, _ todo: Todo) async throws {
-        todo.title += " ."
-        try await todo.save(on: database)
     }
 
 }
