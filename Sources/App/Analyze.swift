@@ -20,14 +20,13 @@ enum Analyze {
         func run(using context: CommandContext, signature: Signature) async throws {
             let limit = signature.limit ?? defaultLimit
 
-            let client = context.application.client
             let db = context.application.db
             let logger = Logger(label: "analyze")
 
             logger.info("using transaction: \(signature.useTransaction)")
 
             do {
-                try await analyze(client: client, database: db, logger: logger, limit: limit,
+                try await analyze(database: db, logger: logger, limit: limit,
                                   useTransaction: signature.useTransaction)
             } catch {
                 logger.error("\(error.localizedDescription)")
@@ -42,7 +41,7 @@ enum Analyze {
 
 extension Analyze {
 
-    static func analyze(client: Client, database: Database, logger: Logger, limit: Int, useTransaction: Bool) async throws {
+    static func analyze(database: Database, logger: Logger, limit: Int, useTransaction: Bool) async throws {
         try await withThrowingTaskGroup(of: Int.self) { group in
             for n in (0..<limit) {
                 group.addTask {
