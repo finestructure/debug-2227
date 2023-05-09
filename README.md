@@ -4,12 +4,6 @@ https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/issues/2227
 
 Run as follows:
 
-- Launch db:
-```
-docker-compose up -d db
-```
-
-- Start batch job:
 ```
 swift run Run analyze --limit 5
 ```
